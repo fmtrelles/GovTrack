@@ -1,7 +1,11 @@
 package com.GovTrack.app.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +22,7 @@ public class Requerimiento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(unique = true, length = 30)
     private String codigo;
 
     @Column(nullable = false, length = 150)
@@ -28,7 +32,10 @@ public class Requerimiento {
     private String descripcion;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tipo_requerimiento_id", nullable = false)
+    @JoinColumn(
+            name = "tipo_requerimiento_id",
+            nullable = false
+    )
     private TipoRequerimiento tipo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -2,12 +2,14 @@ package com.GovTrack.app.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "areas")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Area {
@@ -23,5 +25,6 @@ public class Area {
     private String siglas;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean activo = true;
 }
