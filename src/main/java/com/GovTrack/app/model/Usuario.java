@@ -1,7 +1,5 @@
 package com.GovTrack.app.model;
 
-
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +27,9 @@ public class Usuario {
 
     @Column(nullable = false, unique = true, length = 150)
     private String correo;
+
+    @Column(length = 255)
+    private String password;
 
     @Column(nullable = false)
     @Builder.Default
