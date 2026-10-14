@@ -2,6 +2,7 @@ package com.GovTrack.app.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,14 +24,10 @@ public class RequerimientoRegistroDTO {
     private String descripcion;
 
     @NotNull(message = "El tipo de requerimiento es obligatorio")
+    @Positive(message = "El identificador del tipo debe ser positivo")
     private Long tipoRequerimientoId;
 
     @NotNull(message = "La prioridad es obligatoria")
+    @Positive(message = "El identificador de la prioridad debe ser positivo")
     private Long prioridadId;
-
-    @NotNull(message = "El área solicitante es obligatoria")
-    private Long areaSolicitanteId;
-
-    @NotNull(message = "El usuario solicitante es obligatorio")
-    private Long solicitanteId;
 }
