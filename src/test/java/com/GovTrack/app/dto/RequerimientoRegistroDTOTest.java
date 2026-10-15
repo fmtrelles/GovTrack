@@ -3,23 +3,34 @@ package com.GovTrack.app.dto;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RequerimientoRegistroDTOTest {
 
-    private final Validator validator =
-            Validation.buildDefaultValidatorFactory().getValidator();
+    private static ValidatorFactory factory;
+    private static Validator validator;
+
+    @BeforeAll
+    static void configurarValidador() {
+        factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
+    @AfterAll
+    static void cerrarValidador() {
+        factory.close();
+    }
 
     @Test
     void debeRechazarUnRequerimientoConDatosInvalidos() {
-
-        RequerimientoRegistroDTO dto =
-                new RequerimientoRegistroDTO();
+        RequerimientoRegistroDTO dto = new RequerimientoRegistroDTO();
 
         dto.setTitulo("");
         dto.setDescripcion("Corta");
@@ -27,27 +38,15 @@ class RequerimientoRegistroDTOTest {
         Set<ConstraintViolation<RequerimientoRegistroDTO>> errores =
                 validator.validate(dto);
 
-        assertFalse(errores.isEmpty());
-
         assertTrue(tieneErrorEnCampo(errores, "titulo"));
         assertTrue(tieneErrorEnCampo(errores, "descripcion"));
-        assertTrue(tieneErrorEnCampo(
-                errores,
-                "tipoRequerimientoId"
-        ));
+        assertTrue(tieneErrorEnCampo(errores, "tipoRequerimientoId"));
         assertTrue(tieneErrorEnCampo(errores, "prioridadId"));
-        assertTrue(tieneErrorEnCampo(
-                errores,
-                "areaSolicitanteId"
-        ));
-        assertTrue(tieneErrorEnCampo(errores, "solicitanteId"));
     }
 
     @Test
     void debeAceptarUnRequerimientoConDatosValidos() {
-
-        RequerimientoRegistroDTO dto =
-                new RequerimientoRegistroDTO();
+        RequerimientoRegistroDTO dto = new RequerimientoRegistroDTO();
 
         dto.setTitulo("Compra de computadoras");
         dto.setDescripcion(
@@ -55,8 +54,6 @@ class RequerimientoRegistroDTOTest {
         );
         dto.setTipoRequerimientoId(1L);
         dto.setPrioridadId(3L);
-        dto.setAreaSolicitanteId(1L);
-        dto.setSolicitanteId(1L);
 
         Set<ConstraintViolation<RequerimientoRegistroDTO>> errores =
                 validator.validate(dto);
@@ -70,9 +67,7 @@ class RequerimientoRegistroDTOTest {
     ) {
         return errores.stream()
                 .anyMatch(error ->
-                        error.getPropertyPath()
-                                .toString()
-                                .equals(campo)
+                        error.getPropertyPath().toString().equals(campo)
                 );
     }
 }

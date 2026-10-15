@@ -50,4 +50,25 @@ public class RequerimientoController {
                 requerimientoService.buscarPorId(id, autenticacion)
         );
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RequerimientoRespuestaDTO> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody RequerimientoRegistroDTO dto,
+            Authentication autenticacion) {
+
+        return ResponseEntity.ok(
+                requerimientoService.actualizar(id, dto, autenticacion)
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Long id,
+            Authentication autenticacion) {
+
+        requerimientoService.eliminar(id, autenticacion);
+
+        return ResponseEntity.noContent().build();
+    }
 }

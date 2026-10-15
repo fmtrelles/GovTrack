@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GovTrack Perú</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f5f8;
+            color: #233044;
+            font-family: Arial, sans-serif;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        header {
+            background: #18334f;
+            color: white;
+            padding: 24px max(24px, calc((100% - 1180px) / 2));
+        }
+
+        header h1 {
+            margin: 0 0 6px;
+            font-size: 26px;
+        }
+
+        header p {
+            margin: 0;
+            color: #d5e0eb;
+            font-size: 14px;
+        }
+
+        main {
+            max-width: 1180px;
+            margin: 28px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #dce2e9;
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .login {
+            max-width: 440px;
+            margin: 65px auto;
+        }
+
+        h2 {
+            margin: 0 0 18px;
+            font-size: 21px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #aeb9c7;
+            border-radius: 5px;
+            background: white;
+            color: #233044;
+            font: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid #326fa4;
+            outline-offset: 1px;
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .campo {
+            margin-bottom: 18px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 5px;
+            padding: 11px 17px;
+            background: #245a85;
+            color: white;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        button:hover {
+            filter: brightness(.92);
+        }
+
+        button:disabled {
+            opacity: .6;
+            cursor: wait;
+        }
+
+        .secundario {
+            background: #e7edf3;
+            color: #233044;
+        }
+
+        .eliminar {
+            background: #a33333;
+        }
+
+        .fila {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .dos-columnas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .filtro {
+            min-width: 230px;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 14px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e2e7ed;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f0f4f8;
+        }
+
+        td button {
+            padding: 7px 10px;
+            font-size: 13px;
+        }
+
+        .muted {
+            color: #5e6d7e;
+            font-size: 14px;
+        }
+
+        #mensaje {
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            white-space: pre-line;
+        }
+
+        #mensaje[data-tipo="error"] {
+            background: #fbe9e9;
+            color: #832525;
+            border: 1px solid #e9baba;
+        }
+
+        #mensaje[data-tipo="exito"] {
+            background: #e8f4ec;
+            color: #245e38;
+            border: 1px solid #bad9c5;
+        }
+
+        dialog {
+            border: 1px solid #dce2e9;
+            border-radius: 10px;
+            padding: 25px;
+            width: min(650px, 92vw);
+            max-height: 85vh;
+            overflow-y: auto;
+            color: #233044;
+        }
+
+        dialog::backdrop {
+            background: rgba(15, 30, 45, .55);
+        }
+
+        #detalleContenido {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            line-height: 1.65;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 650px) {
+            .dos-columnas {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+
+            .login {
+                margin-top: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>GovTrack Perú</h1>
+    <p>Gestión y seguimiento de requerimientos</p>
+</header>
+
+<main>
+    <div id="mensaje" role="status" aria-live="polite" hidden></div>
+
+    <section id="loginPanel" class="panel login">
+        <h2>Iniciar sesión</h2>
+        <p class="muted">Ingresa con tu correo y contraseña.</p>
+
+        <form id="loginForm">
+            <div class="campo">
+                <label for="correo">Correo electrónico</label>
+                <input id="correo" type="email" maxlength="150"
+                       autocomplete="username" required>
+            </div>
+
+            <div class="campo">
+                <label for="password">Contraseña</label>
+                <input id="password" type="password" maxlength="64"
+                       autocomplete="current-password" required>
+            </div>
+
+            <button id="ingresar" type="submit">Ingresar</button>
+        </form>
+    </section>
+
+    <section id="aplicacion" hidden>
+        <div class="panel fila">
+            <div>
+                <strong id="nombreUsuario"></strong>
+                <p id="rolesUsuario" class="muted"></p>
+            </div>
+            <button id="cerrarSesion" class="secundario" type="button">
+                Cerrar sesión
+            </button>
+        </div>
+
+        <section class="panel">
+            <div class="fila">
+                <h2>Requerimientos</h2>
+                <button id="nuevo" type="button" hidden>
+                    Nuevo requerimiento
+                </button>
+            </div>
+
+            <div class="fila">
+                <div class="campo filtro">
+                    <label for="estadoFiltro">Filtrar por estado</label>
+                    <select id="estadoFiltro">
+                        <option value="">Todos los estados</option>
+                    </select>
+                </div>
+
+                <button id="actualizarLista" class="secundario" type="button">
+                    Actualizar listado
+                </button>
+            </div>
+
+            <p id="contador" class="muted"></p>
+
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Título</th>
+                        <th>Prioridad</th>
+                        <th>Estado</th>
+                        <th>Solicitante</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="registros"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="editor" class="panel" hidden>
+            <h2 id="tituloEditor">Nuevo requerimiento</h2>
+
+            <form id="requerimientoForm">
+                <div class="campo">
+                    <label for="titulo">Título</label>
+                    <input id="titulo" maxlength="150" required>
+                </div>
+
+                <div class="campo">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" minlength="10"
+                              maxlength="5000" required></textarea>
+                </div>
+
+                <div class="dos-columnas">
+                    <div class="campo">
+                        <label for="tipo">Tipo de requerimiento</label>
+                        <select id="tipo" required></select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="prioridad">Prioridad</label>
+                        <select id="prioridad" required></select>
+                    </div>
+                </div>
+
+                <div class="acciones">
+                    <button id="guardar" type="submit">Guardar</button>
+                    <button id="cancelar" class="secundario" type="button">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </section>
+    </section>
+</main>
+
+<dialog id="detalle">
+    <h2>Detalle del requerimiento</h2>
+    <div id="detalleContenido"></div>
+    <form method="dialog">
+        <button type="submit">Cerrar</button>
+    </form>
+</dialog>
+
+<script>
+    const elemento = id => document.getElementById(id);
+
+    let token = "";
+    let perfil = null;
+    let editandoId = null;
+    let versionListado = 0;
+
+    function mostrarMensaje(texto, tipo = "error") {
+        const mensaje = elemento("mensaje");
+        mensaje.textContent = texto;
+        mensaje.dataset.tipo = tipo;
+        mensaje.hidden = false;
+    }
+
+    function ocultarMensaje() {
+        elemento("mensaje").hidden = true;
+    }
+
+    function salir() {
+        token = "";
+        perfil = null;
+        editandoId = null;
+        versionListado++;
+        elemento("aplicacion").hidden = true;
+        elemento("loginPanel").hidden = false;
+        elemento("editor").hidden = true;
+        elemento("detalle").close();
+        elemento("registros").replaceChildren();
+        elemento("password").value = "";
+        elemento("requerimientoForm").reset();
+    }
+
+    async function api(ruta, opciones = {}) {
+        const headers = new Headers(opciones.headers);
+
+        if (token) {
+            headers.set("Authorization", "Bearer " + token);
+        }
+
+        if (opciones.body) {
+            headers.set("Content-Type", "application/json");
+        }
+
+        const respuesta = await fetch(ruta, {
+            ...opciones,
+            headers
+        });
+
+        const texto = await respuesta.text();
+        let datos = null;
+
+        if (texto) {
+            try {
+                datos = JSON.parse(texto);
+            } catch {
+                datos = null;
+            }
+        }
+
+        if (!respuesta.ok) {
+            if (respuesta.status === 401) {
+                const habiaSesion = Boolean(token);
+                salir();
+
+                throw new Error(
+                    habiaSesion
+                        ? "Tu sesión venció o dejó de ser válida. Ingresa nuevamente."
+                        : "Correo o contraseña incorrectos, o cuenta no habilitada."
+                );
+            }
+
+            const predeterminados = {
+                400: "Revisa los datos ingresados.",
+                403: "No tienes permiso para realizar esta operación.",
+                404: "No se encontró el registro solicitado.",
+                409: "La operación no es válida para el estado actual del registro.",
+                500: "Ocurrió un error en el servidor."
+            };
+
+            throw new Error(
+                datos?.mensaje
+                || datos?.detail
+                || predeterminados[respuesta.status]
+                || "No se pudo completar la operación."
+            );
+        }
+
+        return datos;
+    }
+
+    function tieneRol(rol) {
+        return perfil?.roles.includes("ROLE_" + rol);
+    }
+
+    function puedeRegistrar() {
+        return tieneRol("SOLICITANTE") || tieneRol("ADMINISTRADOR");
+    }
+
+    function puedeModificar(registro) {
+        const propietario = tieneRol("SOLICITANTE")
+            && registro.solicitanteId === perfil.usuarioId;
+
+        return registro.estado.toUpperCase() === "REGISTRADO"
+            && (tieneRol("ADMINISTRADOR") || propietario);
+    }
+
+    function llenarSelect(id, opciones, inicial) {
+        const select = elemento(id);
+        select.replaceChildren(new Option(inicial, ""));
+
+        for (const opcion of opciones) {
+            select.add(new Option(opcion.nombre, opcion.id));
+        }
+    }
+
+    async function cargarPantalla() {
+        perfil = await api("/api/catalogos");
+
+        elemento("nombreUsuario").textContent = perfil.nombre;
+        elemento("rolesUsuario").textContent = perfil.roles
+            .map(rol => rol.replace(/^ROLE_/, ""))
+            .join(", ");
+
+        llenarSelect("tipo", perfil.tipos, "Selecciona un tipo");
+        llenarSelect("prioridad", perfil.prioridades, "Selecciona una prioridad");
+        llenarSelect("estadoFiltro", perfil.estados, "Todos los estados");
+
+        elemento("nuevo").hidden = !puedeRegistrar();
+        elemento("loginPanel").hidden = true;
+        elemento("aplicacion").hidden = false;
+
+        await listar();
+    }
+
+    function celda(fila, texto) {
+        const td = document.createElement("td");
+        td.textContent = texto ?? "";
+        fila.appendChild(td);
+        return td;
+    }
+
+    function boton(texto, accion, clase = "") {
+        const control = document.createElement("button");
+        control.type = "button";
+        control.textContent = texto;
+        control.className = clase;
+
+        control.addEventListener("click", async () => {
+            control.disabled = true;
+
+            try {
+                await accion();
+            } catch (error) {
+                mostrarMensaje(error.message);
+            } finally {
+                control.disabled = false;
+            }
+        });
+
+        return control;
+    }
+
+    async function listar() {
+        const version = ++versionListado;
+        const estadoId = elemento("estadoFiltro").value;
+
+        const ruta = estadoId
+            ? "/api/requerimientos?estadoId=" + encodeURIComponent(estadoId)
+            : "/api/requerimientos";
+
+        const registros = await api(ruta);
+
+        if (version !== versionListado || !perfil) {
+            return;
+        }
+
+        const cuerpo = elemento("registros");
+        cuerpo.replaceChildren();
+
+        elemento("contador").textContent =
+            registros.length + " requerimiento(s) encontrado(s)";
+
+        for (const registro of registros) {
+            const fila = document.createElement("tr");
+
+            celda(fila, registro.codigo);
+            celda(fila, registro.titulo);
+            celda(fila, registro.prioridad);
+            celda(fila, registro.estado);
+            celda(fila, registro.solicitante);
+
+            const acciones = celda(fila, "");
+            const grupo = document.createElement("div");
+            grupo.className = "acciones";
+
+            grupo.appendChild(boton("Ver", () => ver(registro.id), "secundario"));
+
+            if (puedeModificar(registro)) {
+                grupo.appendChild(
+                    boton("Editar", () => abrirEditor(registro), "secundario")
+                );
+
+                grupo.appendChild(
+                    boton("Eliminar", () => eliminar(registro), "eliminar")
+                );
+            }
+
+            acciones.appendChild(grupo);
+            cuerpo.appendChild(fila);
+        }
+
+        if (registros.length === 0) {
+            const fila = document.createElement("tr");
+            const vacio = celda(fila, "No hay requerimientos para mostrar.");
+            vacio.colSpan = 6;
+            cuerpo.appendChild(fila);
+        }
+    }
+
+    async function ver(id) {
+        const registro = await api("/api/requerimientos/" + id);
+
+        elemento("detalleContenido").textContent = [
+            "Código: " + registro.codigo,
+            "Título: " + registro.titulo,
+            "",
+            "Descripción: " + registro.descripcion,
+            "",
+            "Tipo: " + registro.tipo,
+            "Prioridad: " + registro.prioridad,
+            "Estado: " + registro.estado,
+            "Área solicitante: " + registro.areaSolicitante,
+            "Solicitante: " + registro.solicitante,
+            "Área responsable: " + (registro.areaResponsable || "Sin asignar"),
+            "Responsable: " + (registro.responsable || "Sin asignar"),
+            "Fecha de registro: " + registro.fechaRegistro.replace("T", " ")
+        ].join("\n");
+
+        elemento("detalle").showModal();
+    }
+
+    function abrirEditor(registro = null) {
+        ocultarMensaje();
+        elemento("requerimientoForm").reset();
+        editandoId = registro?.id ?? null;
+
+        elemento("tituloEditor").textContent = registro
+            ? "Editar " + registro.codigo
+            : "Nuevo requerimiento";
+
+        if (registro) {
+            elemento("titulo").value = registro.titulo;
+            elemento("descripcion").value = registro.descripcion;
+
+            const tipo = perfil.tipos.find(
+                item => item.nombre === registro.tipo
+            );
+
+            const prioridad = perfil.prioridades.find(
+                item => item.nombre === registro.prioridad
+            );
+
+            elemento("tipo").value = tipo?.id ?? "";
+            elemento("prioridad").value = prioridad?.id ?? "";
+        }
+
+        elemento("editor").hidden = false;
+        elemento("editor").scrollIntoView({behavior: "smooth"});
+        elemento("titulo").focus();
+    }
+
+    async function eliminar(registro) {
+        const confirmado = window.confirm(
+            "¿Eliminar " + registro.codigo
+            + "? Esta operación no se puede deshacer."
+        );
+
+        if (!confirmado) {
+            return;
+        }
+
+        await api("/api/requerimientos/" + registro.id, {
+            method: "DELETE"
+        });
+
+        if (editandoId === registro.id) {
+            elemento("editor").hidden = true;
+            editandoId = null;
+        }
+
+        mostrarMensaje("Requerimiento eliminado.", "exito");
+        await listar();
+    }
+
+    elemento("loginForm").addEventListener("submit", async evento => {
+        evento.preventDefault();
+        ocultarMensaje();
+        elemento("ingresar").disabled = true;
+
+        try {
+            const datos = await api("/api/auth/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    correo: elemento("correo").value.trim(),
+                    password: elemento("password").value
+                })
+            });
+
+            token = datos.token;
+            elemento("password").value = "";
+            await cargarPantalla();
+        } catch (error) {
+            salir();
+            mostrarMensaje(error.message);
+        } finally {
+            elemento("ingresar").disabled = false;
+        }
+    });
+
+    elemento("requerimientoForm").addEventListener("submit", async evento => {
+        evento.preventDefault();
+        ocultarMensaje();
+
+        const titulo = elemento("titulo").value.trim();
+        const descripcion = elemento("descripcion").value.trim();
+
+        if (!titulo || descripcion.length < 10) {
+            mostrarMensaje(
+                "Ingresa un título y una descripción de al menos 10 caracteres."
+            );
+            return;
+        }
+
+        elemento("guardar").disabled = true;
+
+        try {
+            const ruta = editandoId === null
+                ? "/api/requerimientos"
+                : "/api/requerimientos/" + editandoId;
+
+            const resultado = await api(ruta, {
+                method: editandoId === null ? "POST" : "PUT",
+                body: JSON.stringify({
+                    titulo,
+                    descripcion,
+                    tipoRequerimientoId: Number(elemento("tipo").value),
+                    prioridadId: Number(elemento("prioridad").value)
+                })
+            });
+
+            elemento("editor").hidden = true;
+            editandoId = null;
+
+            mostrarMensaje(
+                "Requerimiento " + resultado.codigo + " guardado.",
+                "exito"
+            );
+
+            await listar();
+        } catch (error) {
+            mostrarMensaje(error.message);
+        } finally {
+            elemento("guardar").disabled = false;
+        }
+    });
+
+    elemento("nuevo").addEventListener("click", () => abrirEditor());
+
+    elemento("cancelar").addEventListener("click", () => {
+        elemento("editor").hidden = true;
+        editandoId = null;
+    });
+
+    elemento("cerrarSesion").addEventListener("click", () => {
+        salir();
+        ocultarMensaje();
+    });
+
+    elemento("estadoFiltro").addEventListener("change", async () => {
+        ocultarMensaje();
+
+        try {
+            await listar();
+        } catch (error) {
+            mostrarMensaje(error.message);
+        }
+    });
+
+    elemento("actualizarLista").addEventListener("click", async () => {
+        ocultarMensaje();
+
+        try {
+            await listar();
+        } catch (error) {
+            mostrarMensaje(error.message);
+        }
+    });
+</script>
+</body>
+</html>

@@ -25,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Year;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 public class RequerimientoService {
@@ -65,32 +66,6 @@ public class RequerimientoService {
             );
         }
 
-        TipoRequerimiento tipo = tipoRepository
-                .findById(dto.getTipoRequerimientoId())
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "El tipo de requerimiento no existe"
-                ));
-
-        if (!Boolean.TRUE.equals(tipo.getActivo())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "El tipo de requerimiento está inactivo"
-            );
-        }
-
-        Prioridad prioridad = prioridadRepository
-                .findById(dto.getPrioridadId())
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "La prioridad no existe"
-                ));
-
-        if (!Boolean.TRUE.equals(prioridad.getActivo())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "La prioridad está inactiva"
-            );
-        }
-
         EstadoRequerimiento estadoInicial = estadoRepository
                 .findByNombreIgnoreCase("REGISTRADO")
                 .orElseThrow(() -> new RecursoNoEncontradoException(
@@ -105,23 +80,22 @@ public class RequerimientoService {
         }
 
         Requerimiento requerimiento = Requerimiento.builder()
-                .titulo(dto.getTitulo().trim())
-                .descripcion(dto.getDescripcion().trim())
-                .tipo(tipo)
-                .prioridad(prioridad)
+                .codigo(UUID.randomUUID().toString())
                 .estado(estadoInicial)
                 .areaSolicitante(area)
                 .solicitante(solicitante)
                 .build();
 
+        aplicarDatos(requerimiento, dto);
+
         Requerimiento guardado =
-                requerimientoRepository.save(requerimiento);
+                requerimientoRepository.saveAndFlush(requerimiento);
 
         guardado.setCodigo(generarCodigo(guardado.getId()));
 
-        guardado = requerimientoRepository.save(guardado);
-
-        return convertirARespuesta(guardado);
+        return convertirARespuesta(
+                requerimientoRepository.saveAndFlush(guardado)
+        );
     }
 
     @PreAuthorize("""
@@ -168,19 +142,11 @@ public class RequerimientoService {
             Authentication autenticacion) {
 
         Usuario usuario = obtenerUsuario(autenticacion);
-
-        Requerimiento requerimiento = requerimientoRepository
-                .findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "No existe un requerimiento con ID " + id
-                ));
+        Requerimiento requerimiento = obtenerRequerimiento(id);
 
         boolean esPropio =
                 tieneRol(autenticacion, "SOLICITANTE")
-                        && Objects.equals(
-                        requerimiento.getSolicitante().getId(),
-                        usuario.getId()
-                );
+                        && esPropietario(requerimiento, usuario);
 
         boolean estaAsignado =
                 tieneRol(autenticacion, "RESPONSABLE")
@@ -197,6 +163,107 @@ public class RequerimientoService {
         }
 
         return convertirARespuesta(requerimiento);
+    }
+
+    @PreAuthorize("hasAnyRole('SOLICITANTE', 'ADMINISTRADOR')")
+    @Transactional
+    public RequerimientoRespuestaDTO actualizar(
+            Long id,
+            RequerimientoRegistroDTO dto,
+            Authentication autenticacion) {
+
+        Usuario usuario = obtenerUsuario(autenticacion);
+        Requerimiento requerimiento = obtenerRequerimiento(id);
+
+        validarModificacion(requerimiento, usuario, autenticacion);
+        aplicarDatos(requerimiento, dto);
+
+        return convertirARespuesta(
+                requerimientoRepository.saveAndFlush(requerimiento)
+        );
+    }
+
+    @PreAuthorize("hasAnyRole('SOLICITANTE', 'ADMINISTRADOR')")
+    @Transactional
+    public void eliminar(Long id, Authentication autenticacion) {
+        Usuario usuario = obtenerUsuario(autenticacion);
+        Requerimiento requerimiento = obtenerRequerimiento(id);
+
+        validarModificacion(requerimiento, usuario, autenticacion);
+
+        requerimientoRepository.delete(requerimiento);
+        requerimientoRepository.flush();
+    }
+
+    private void aplicarDatos(
+            Requerimiento requerimiento,
+            RequerimientoRegistroDTO dto) {
+
+        TipoRequerimiento tipo = tipoRepository
+                .findById(dto.getTipoRequerimientoId())
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "El tipo de requerimiento no existe"
+                ));
+
+        Prioridad prioridad = prioridadRepository
+                .findById(dto.getPrioridadId())
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "La prioridad no existe"
+                ));
+
+        if (!Boolean.TRUE.equals(tipo.getActivo())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "El tipo de requerimiento está inactivo"
+            );
+        }
+
+        if (!Boolean.TRUE.equals(prioridad.getActivo())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La prioridad está inactiva"
+            );
+        }
+
+        requerimiento.setTitulo(dto.getTitulo().trim());
+        requerimiento.setDescripcion(dto.getDescripcion().trim());
+        requerimiento.setTipo(tipo);
+        requerimiento.setPrioridad(prioridad);
+    }
+
+    private void validarModificacion(
+            Requerimiento requerimiento,
+            Usuario usuario,
+            Authentication autenticacion) {
+
+        boolean administrador =
+                tieneRol(autenticacion, "ADMINISTRADOR");
+
+        boolean solicitantePropietario =
+                tieneRol(autenticacion, "SOLICITANTE")
+                        && esPropietario(requerimiento, usuario);
+
+        if (!administrador && !solicitantePropietario) {
+            throw new AccessDeniedException(
+                    "No tienes permiso para modificar este requerimiento"
+            );
+        }
+
+        if (!"REGISTRADO".equalsIgnoreCase(
+                requerimiento.getEstado().getNombre())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Solo se pueden modificar o eliminar requerimientos registrados"
+            );
+        }
+    }
+
+    private Requerimiento obtenerRequerimiento(Long id) {
+        return requerimientoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "No existe un requerimiento con ID " + id
+                ));
     }
 
     private Usuario obtenerUsuario(Authentication autenticacion) {
@@ -216,7 +283,20 @@ public class RequerimientoService {
                 ));
     }
 
-    private boolean tieneRol(Authentication autenticacion, String rol) {
+    private boolean esPropietario(
+            Requerimiento requerimiento,
+            Usuario usuario) {
+
+        return Objects.equals(
+                requerimiento.getSolicitante().getId(),
+                usuario.getId()
+        );
+    }
+
+    private boolean tieneRol(
+            Authentication autenticacion,
+            String rol) {
+
         return autenticacion.getAuthorities()
                 .stream()
                 .anyMatch(permiso ->

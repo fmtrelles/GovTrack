@@ -74,6 +74,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR)
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/", "/index.html")
+                        .permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/auth/register",
