@@ -1,0 +1,73 @@
+<div class="estructura">
+  <header class="cabecera">
+    <div class="cabecera-contenido">
+      <a class="marca" routerLink="/requerimientos">
+        <span class="nombre">GovTrack Perú</span>
+        <span class="subtitulo">Gestión de requerimientos</span>
+      </a>
+
+      <div class="cuenta">
+        @if (usuario(); as datos) {
+        <div class="identidad">
+          <span class="nombre-usuario">{{ datos.nombre }}</span>
+          <span class="rol">{{ roles() }}</span>
+        </div>
+        } @else if (cargando()) {
+        <span class="rol" role="status">Cargando cuenta...</span>
+        }
+
+        <button
+          class="cerrar"
+          type="button"
+          (click)="cerrarSesion()"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="menu" aria-label="Menú principal">
+    <div class="menu-contenido">
+      <a
+        routerLink="/requerimientos"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page"
+      >
+        Requerimientos
+      </a>
+
+      @if (puedeCrear()) {
+      <a
+        routerLink="/requerimientos/nuevo"
+        routerLinkActive="activo"
+        ariaCurrentWhenActive="page"
+      >
+        Nuevo requerimiento
+      </a>
+      }
+    </div>
+  </nav>
+
+  @if (error()) {
+  <div class="aviso" role="alert">
+    <span>{{ error() }}</span>
+    <button
+      type="button"
+      [disabled]="cargando()"
+      (click)="cargarUsuario()"
+    >
+      Reintentar
+    </button>
+  </div>
+  }
+
+  <div class="vista">
+    <router-outlet></router-outlet>
+  </div>
+
+  <footer class="pie">
+    GovTrack Perú · Gestión y seguimiento de requerimientos
+  </footer>
+</div>

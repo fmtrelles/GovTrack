@@ -4,32 +4,47 @@ import { Login } from './pages/login/login';
 import { Listado } from './pages/requerimientos/listado/listado';
 import { Formulario } from './pages/requerimientos/formulario/formulario';
 import { Detalle } from './pages/requerimientos/detalle/detalle';
+import { Layout } from './layout/layout';
 import { authGuard } from './services/auth.guard';
 
 const routes: Routes = [
-  { path: 'login', component: Login },
   {
-    path: 'requerimientos/nuevo',
-    component: Formulario,
-    canActivate: [authGuard]
+    path: 'login',
+    component: Login
   },
   {
-    path: 'requerimientos/:id/editar',
-    component: Formulario,
-    canActivate: [authGuard]
+    path: '',
+    component: Layout,
+    canActivate: [authGuard],
+    canActivateChild: [authGuard],
+    children: [
+      {
+        path: 'requerimientos/nuevo',
+        component: Formulario
+      },
+      {
+        path: 'requerimientos/:id/editar',
+        component: Formulario
+      },
+      {
+        path: 'requerimientos/:id',
+        component: Detalle
+      },
+      {
+        path: 'requerimientos',
+        component: Listado
+      },
+      {
+        path: '',
+        redirectTo: 'requerimientos',
+        pathMatch: 'full'
+      }
+    ]
   },
   {
-    path: 'requerimientos/:id',
-    component: Detalle,
-    canActivate: [authGuard]
-  },
-  {
-    path: 'requerimientos',
-    component: Listado,
-    canActivate: [authGuard]
-  },
-  { path: '', redirectTo: 'requerimientos', pathMatch: 'full' },
-  { path: '**', redirectTo: 'requerimientos' }
+    path: '**',
+    redirectTo: 'requerimientos'
+  }
 ];
 
 @NgModule({

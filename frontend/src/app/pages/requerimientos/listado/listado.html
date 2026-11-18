@@ -1,20 +1,6 @@
-<header class="cabecera">
-  <span class="marca">GovTrack Perú</span>
-
-  <div class="usuario">
-    <span>{{ catalogos()?.nombre }}</span>
-    <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
-  </div>
-</header>
-
 <main class="contenido">
   <h1>Requerimientos</h1>
 
-  @if (puedeCrear()) {
-  <a class="boton-nuevo" routerLink="/requerimientos/nuevo">
-    Nuevo requerimiento
-  </a>
-  }
 
   <p class="descripcion">
     Consulta y seguimiento de los requerimientos disponibles para tu cuenta.
@@ -38,7 +24,10 @@
         </select>
       </div>
 
-      <span>{{ requerimientos().length }} registros</span>
+      <span>
+  {{ requerimientos().length }}
+  {{ requerimientos().length === 1 ? 'registro' : 'registros' }}
+</span>
     </div>
 
     @if (error()) {
@@ -70,7 +59,25 @@
           <td><span class="estado">{{ item.estado }}</span></td>
           <td>{{ item.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
           <td>
-            <a [routerLink]="['/requerimientos', item.id]">
+            <a
+              [routerLink]="['/requerimientos', item.id]"
+              style="display: inline-flex; align-items: center; gap: 6px;"
+            >
+              <svg
+                width="14"
+                height="14"
+                style="width: 14px; height: 14px; flex-shrink: 0;"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m16 3 5 5-12 12-6 1 1-6L16 3Z" />
+                <path d="m14 5 5 5" />
+              </svg>
               Ver detalle
             </a>
           </td>
