@@ -1,0 +1,170 @@
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 32px;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.marca {
+  color: #1d4ed8;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+button,
+select {
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  color: #0f172a;
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+}
+
+.contenido {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+h1 {
+  margin: 0 0 10px;
+}
+
+.descripcion {
+  margin: 0 0 28px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.panel {
+  overflow: hidden;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.filtros {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+  padding: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  span {
+    color: #64748b;
+    font-size: 14px;
+  }
+}
+
+.tabla {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+th {
+  background: #f8fafc;
+  color: #475569;
+}
+
+.codigo {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.estado {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1e40af;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.mensaje {
+  padding: 28px;
+  text-align: center;
+  color: #64748b;
+}
+
+.error {
+  margin: 20px;
+  padding: 14px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .cabecera {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .usuario {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .contenido {
+    padding: 24px 12px;
+  }
+
+  .filtros {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+.boton-nuevo {
+  display: inline-block;
+  margin: 12px 0;
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: #1d4ed8;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+
+  &:hover {
+    background: #1e40af;
+  }
+}
+}

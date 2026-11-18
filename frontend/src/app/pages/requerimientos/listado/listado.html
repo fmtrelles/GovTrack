@@ -1,0 +1,90 @@
+<header class="cabecera">
+  <span class="marca">GovTrack Perú</span>
+
+  <div class="usuario">
+    <span>{{ catalogos()?.nombre }}</span>
+    <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+  </div>
+</header>
+
+<main class="contenido">
+  <h1>Requerimientos</h1>
+
+  @if (puedeCrear()) {
+  <a class="boton-nuevo" routerLink="/requerimientos/nuevo">
+    Nuevo requerimiento
+  </a>
+  }
+
+  <p class="descripcion">
+    Consulta y seguimiento de los requerimientos disponibles para tu cuenta.
+  </p>
+
+  <section class="panel">
+    <div class="filtros">
+      <div>
+        <label for="estado">Estado</label>
+        <select
+          id="estado"
+          #estado
+          [disabled]="cargando() || !catalogos()"
+          (change)="filtrar(estado.value)"
+        >
+          <option value="">Todos los estados</option>
+
+          @for (opcion of catalogos()?.estados ?? []; track opcion.id) {
+          <option [value]="opcion.id">{{ opcion.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <span>{{ requerimientos().length }} registros</span>
+    </div>
+
+    @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+    } @else if (cargando()) {
+    <p class="mensaje" role="status">Cargando requerimientos...</p>
+    } @else {
+    <div class="tabla">
+      <table>
+        <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Título</th>
+          <th scope="col">Solicitante</th>
+          <th scope="col">Prioridad</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Fecha</th>
+          <th scope="col">Acciones</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        @for (item of requerimientos(); track item.id) {
+        <tr>
+          <td class="codigo">{{ item.codigo }}</td>
+          <td>{{ item.titulo }}</td>
+          <td>{{ item.solicitante }}</td>
+          <td>{{ item.prioridad }}</td>
+          <td><span class="estado">{{ item.estado }}</span></td>
+          <td>{{ item.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <a [routerLink]="['/requerimientos', item.id]">
+              Ver detalle
+            </a>
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="7" class="mensaje">
+            No hay requerimientos para mostrar.
+          </td>
+        </tr>
+        }
+        </tbody>
+      </table>
+    </div>
+    }
+  </section>
+</main>

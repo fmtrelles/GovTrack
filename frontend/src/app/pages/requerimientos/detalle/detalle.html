@@ -1,0 +1,109 @@
+<main class="contenido">
+  <a class="volver" routerLink="/requerimientos">Volver al listado</a>
+
+  <h1>Detalle del requerimiento</h1>
+
+  @if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+  <p role="status">Cargando requerimiento...</p>
+  }
+
+  @if (requerimiento(); as item) {
+  <section class="panel">
+    <div class="encabezado">
+      <div>
+        <span class="codigo">{{ item.codigo }}</span>
+        <h2>{{ item.titulo }}</h2>
+      </div>
+
+      <span class="estado">{{ item.estado }}</span>
+    </div>
+
+    <h3>Descripción</h3>
+    <p class="descripcion">{{ item.descripcion }}</p>
+
+    <dl class="datos">
+      <div>
+        <dt>Tipo</dt>
+        <dd>{{ item.tipo }}</dd>
+      </div>
+
+      <div>
+        <dt>Prioridad</dt>
+        <dd>{{ item.prioridad }}</dd>
+      </div>
+
+      <div>
+        <dt>Solicitante</dt>
+        <dd>{{ item.solicitante }}</dd>
+      </div>
+
+      <div>
+        <dt>Área solicitante</dt>
+        <dd>{{ item.areaSolicitante }}</dd>
+      </div>
+
+      <div>
+        <dt>Responsable</dt>
+        <dd>{{ item.responsable || 'Sin asignar' }}</dd>
+      </div>
+
+      <div>
+        <dt>Área responsable</dt>
+        <dd>{{ item.areaResponsable || 'Sin asignar' }}</dd>
+      </div>
+
+      <div>
+        <dt>Fecha de registro</dt>
+        <dd>{{ item.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</dd>
+      </div>
+
+      <div>
+        <dt>Última actualización</dt>
+        <dd>
+          {{ (item.fechaActualizacion | date:'dd/MM/yyyy HH:mm') || 'Sin modificaciones' }}
+        </dd>
+      </div>
+
+      <div>
+        <dt>Fecha límite de atención</dt>
+        <dd>
+          {{ (item.fechaLimiteAtencion | date:'dd/MM/yyyy HH:mm') || 'Sin definir' }}
+        </dd>
+      </div>
+
+      <div>
+        <dt>Fecha de cierre</dt>
+        <dd>
+          {{ (item.fechaCierre | date:'dd/MM/yyyy HH:mm') || 'Sin cierre' }}
+        </dd>
+      </div>
+    </dl>
+
+    @if (puedeModificar()) {
+    <div class="acciones">
+      @if (!eliminando()) {
+      <a
+        class="boton"
+        [routerLink]="['/requerimientos', item.id, 'editar']"
+      >
+        Editar
+      </a>
+      }
+
+      <button
+        type="button"
+        class="eliminar"
+        [disabled]="eliminando()"
+        (click)="eliminar()"
+      >
+        {{ eliminando() ? 'Eliminando...' : 'Eliminar' }}
+      </button>
+    </div>
+    }
+  </section>
+  }
+</main>

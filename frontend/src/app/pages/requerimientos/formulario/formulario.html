@@ -1,0 +1,109 @@
+<main class="contenido">
+  <a class="volver" routerLink="/requerimientos">Volver al listado</a>
+
+  <h1>
+    {{ editando() ? 'Editar requerimiento' : 'Nuevo requerimiento' }}
+  </h1>
+
+  <p class="descripcion">
+    @if (editando()) {
+    Actualiza los datos del requerimiento.
+    } @else {
+    El solicitante y su área se asignarán desde tu cuenta.
+    }
+  </p>
+
+  @if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+  <p role="status">Cargando formulario...</p>
+  } @else if (permitido()) {
+  <form
+    class="panel"
+    [formGroup]="formulario"
+    (ngSubmit)="guardar()"
+  >
+    <div class="campo">
+      <label for="titulo">Título</label>
+      <input
+        id="titulo"
+        type="text"
+        formControlName="titulo"
+        maxlength="150"
+        placeholder="Ejemplo: Compra de computadoras"
+      >
+
+      @if (formulario.controls.titulo.touched && formulario.controls.titulo.invalid) {
+      <small>Ingresa un título de hasta 150 caracteres.</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="descripcion">Descripción</label>
+      <textarea
+        id="descripcion"
+        formControlName="descripcion"
+        rows="6"
+        maxlength="5000"
+        placeholder="Describe lo que necesitas y su finalidad"
+      ></textarea>
+
+      @if (formulario.controls.descripcion.touched && formulario.controls.descripcion.invalid) {
+      <small>Ingresa una descripción de entre 10 y 5000 caracteres.</small>
+      }
+    </div>
+
+    <div class="columnas">
+      <div class="campo">
+        <label for="tipo">Tipo de requerimiento</label>
+        <select id="tipo" formControlName="tipoRequerimientoId">
+          <option [ngValue]="0">Selecciona un tipo</option>
+
+          @for (tipo of catalogos()?.tipos ?? []; track tipo.id) {
+          <option [ngValue]="tipo.id">{{ tipo.nombre }}</option>
+          }
+        </select>
+
+        @if (formulario.controls.tipoRequerimientoId.touched && formulario.controls.tipoRequerimientoId.invalid) {
+        <small>Selecciona un tipo de requerimiento.</small>
+        }
+      </div>
+
+      <div class="campo">
+        <label for="prioridad">Prioridad</label>
+        <select id="prioridad" formControlName="prioridadId">
+          <option [ngValue]="0">Selecciona una prioridad</option>
+
+          @for (prioridad of catalogos()?.prioridades ?? []; track prioridad.id) {
+          <option [ngValue]="prioridad.id">
+            {{ prioridad.nombre }}
+          </option>
+          }
+        </select>
+
+        @if (formulario.controls.prioridadId.touched && formulario.controls.prioridadId.invalid) {
+        <small>Selecciona una prioridad.</small>
+        }
+      </div>
+    </div>
+
+    <div class="acciones">
+      @if (!guardando()) {
+      <a routerLink="/requerimientos">Cancelar</a>
+      }
+
+      <button type="submit" [disabled]="guardando()">
+        {{
+        guardando()
+        ? 'Guardando...'
+        : editando()
+        ? 'Guardar cambios'
+        : 'Registrar requerimiento'
+        }}
+      </button>
+    </div>
+  </form>
+  }
+</main>
